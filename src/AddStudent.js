@@ -22,9 +22,10 @@ import {
   Snackbar,
   Alert
 } from "@mui/material";
-import { MdOutlineAccountCircle, MdLocationOn, MdSchool, MdContactPhone, MdSearch, MdDelete, MdEdit } from "react-icons/md";
+import { MdOutlineAccountCircle, MdLocationOn, MdSchool, MdContactPhone, MdSearch, MdDelete, MdEdit, MdDownload } from "react-icons/md";
 import { motion } from "framer-motion";
 import { styled } from '@mui/material/styles';
+import * as XLSX from 'xlsx';
 
 const GradientCard = styled(Card)(({ theme }) => ({
   background: "linear-gradient(to right, #e0f2f1, #b2dfdb)",
@@ -79,10 +80,6 @@ const TableHeaderCell = styled(TableCell)({
   textAlign: "center",
   fontWeight: "bold",
 });
-
-// const ActionButton = styled(IconButton)({
-//   color: "#004d40",
-// });
 
 const TableRowStyled = styled(TableRow)(({ theme }) => ({
   backgroundColor: "#e0f2f1", // Light teal background
@@ -152,7 +149,7 @@ const AddStudent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (contactNo.length !== 10) {
       setToastMessage("Contact number must have exactly 10 digits.");
@@ -218,6 +215,17 @@ const AddStudent = () => {
     setShowToast(false);
   };
 
+  const handleDownload = () => {
+    // Create a new workbook and add a worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(filteredStudents);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+
+    // Generate buffer and create a download link
+    const fileName = "students_data.xlsx";
+    XLSX.writeFile(workbook, fileName);
+  };
+
   return (
     <GradientContainer maxWidth="md">
       <SearchBar
@@ -251,7 +259,7 @@ const AddStudent = () => {
                 labelId="select-institute-label"
                 value={selectedInstitute}
                 onChange={(e) => setSelectedInstitute(e.target.value)}
-                label="Select Institute"
+                required
               >
                 {institutes.map((institute) => (
                   <MenuItem key={institute.id} value={institute.id}>
@@ -268,11 +276,12 @@ const AddStudent = () => {
               margin="normal"
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
+              required
               InputProps={{
                 startAdornment: <MdOutlineAccountCircle style={{ marginRight: 8, color: "#004d40" }} />
               }}
-              sx={{ fontFamily: "'Roboto', sans-serif" }}
             />
+            
             <TextField
               fullWidth
               label="Address"
@@ -280,11 +289,12 @@ const AddStudent = () => {
               margin="normal"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              required
               InputProps={{
                 startAdornment: <MdLocationOn style={{ marginRight: 8, color: "#004d40" }} />
               }}
-              sx={{ fontFamily: "'Roboto', sans-serif" }}
             />
+
             <TextField
               fullWidth
               label="Semester"
@@ -292,11 +302,12 @@ const AddStudent = () => {
               margin="normal"
               value={semester}
               onChange={(e) => setSemester(e.target.value)}
+              required
               InputProps={{
                 startAdornment: <MdSchool style={{ marginRight: 8, color: "#004d40" }} />
               }}
-              sx={{ fontFamily: "'Roboto', sans-serif" }}
             />
+
             <TextField
               fullWidth
               label="Contact Number"
@@ -304,60 +315,79 @@ const AddStudent = () => {
               margin="normal"
               value={contactNo}
               onChange={(e) => setContactNo(e.target.value)}
+              required
               InputProps={{
                 startAdornment: <MdContactPhone style={{ marginRight: 8, color: "#004d40" }} />
               }}
-              sx={{ fontFamily: "'Roboto', sans-serif" }}
             />
 
-            <SubmitButton type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
+            <SubmitButton
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{ mt: 2, fontFamily: "'Roboto', sans-serif" }}
+            >
               {editStudentId ? "Update Student" : "Add Student"}
             </SubmitButton>
           </motion.form>
-
-          <ShowButton variant="contained" onClick={() => setShowStudents(!showStudents)}>
-            {showStudents ? "Hide Students" : "Show Students"}
-          </ShowButton>
-
-          {showStudents && (
-            <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableHeaderCell>Student Name</TableHeaderCell>
-                    <TableHeaderCell>Address</TableHeaderCell>
-                    <TableHeaderCell>Semester</TableHeaderCell>
-                    <TableHeaderCell>Contact Number</TableHeaderCell>
-                    <TableHeaderCell>Actions</TableHeaderCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredStudents.map((student) => (
-                    <TableRowStyled key={student.id}>
-                      <TableCell>{student.StudentName}</TableCell>
-                      <TableCell>{student.Address}</TableCell>
-                      <TableCell>{student.Semester}</TableCell>
-                      <TableCell>{student.ContactNo}</TableCell>
-                      <TableCell>
-                        <IconButton onClick={() => handleEdit(student)}>
-                          <MdEdit />
-                        </IconButton>
-                        <IconButton onClick={() => handleDelete(student.id)}>
-                          <MdDelete />
-                        </IconButton>
-                      </TableCell>
-                    </TableRowStyled>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
         </CardContent>
       </GradientCard>
 
+      {showStudents && (
+        <TableContainer component={Paper}>
+          <Table aria-label="student table">
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Student Name</TableHeaderCell>
+                <TableHeaderCell>Address</TableHeaderCell>
+                <TableHeaderCell>Semester</TableHeaderCell>
+                <TableHeaderCell>Contact No</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredStudents.map((student) => (
+                <TableRowStyled key={student.id}>
+                  <TableCell>{student.StudentName}</TableCell>
+                  <TableCell>{student.Address}</TableCell>
+                  <TableCell>{student.Semester}</TableCell>
+                  <TableCell>{student.ContactNo}</TableCell>
+                  <TableCell align="center">
+                    <IconButton onClick={() => handleEdit(student)}>
+                      <MdEdit style={{ color: "#004d40" }} />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(student.id)}>
+                      <MdDelete style={{ color: "#d32f2f" }} />
+                    </IconButton>
+                  </TableCell>
+                </TableRowStyled>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      <ShowButton
+        variant="contained"
+        onClick={() => setShowStudents(!showStudents)}
+      >
+        {showStudents ? "Hide Students" : "Show Students"}
+      </ShowButton>
+
+      {filteredStudents.length > 0 && (
+        <Button
+          variant="contained"
+          startIcon={<MdDownload />}
+          onClick={handleDownload}
+          sx={{ mt: 2, backgroundColor: "#004d40", "&:hover": { backgroundColor: "#003d33" } }}
+        >
+          Download
+        </Button>
+      )}
+
       <Snackbar
         open={showToast}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={handleToastClose}
       >
         <Alert onClose={handleToastClose} severity="success">
@@ -370,4 +400,3 @@ const AddStudent = () => {
 
 export default AddStudent;
 
-             
