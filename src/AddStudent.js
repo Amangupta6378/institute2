@@ -240,6 +240,49 @@ const AddStudent = () => {
         }}
         sx={{ fontFamily: "'Roboto', sans-serif" }}
       />
+      {showStudents && (
+        <TableContainer component={Paper}>
+          <Table aria-label="student table">
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Student Name</TableHeaderCell>
+                <TableHeaderCell>Address</TableHeaderCell>
+                <TableHeaderCell>Semester</TableHeaderCell>
+                <TableHeaderCell>Contact No</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredStudents.map((student) => (
+                <TableRowStyled key={student.id}>
+                  <TableCell>{student.StudentName}</TableCell>
+                  <TableCell>{student.Address}</TableCell>
+                  <TableCell>{student.Semester}</TableCell>
+                  <TableCell>{student.ContactNo}</TableCell>
+                  <TableCell align="center">
+                    <IconButton onClick={() => handleEdit(student)}>
+                      <MdEdit style={{ color: "#004d40" }} />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(student.id)}>
+                      <MdDelete style={{ color: "#d32f2f" }} />
+                    </IconButton>
+                  </TableCell>
+                </TableRowStyled>
+              ))}
+              {filteredStudents.length > 0 && (
+        <Button
+          variant="contained"
+          startIcon={<MdDownload />}
+          onClick={handleDownload}
+          sx={{ mt: 2,mb:4, backgroundColor: "#004d40", "&:hover": { backgroundColor: "#003d33" } }}
+        >
+          Download
+        </Button>
+      )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
       <GradientCard>
         <CardContent>
           <Typography variant="h4" gutterBottom align="center" sx={{ marginTop: 4, color: "#004d40", fontFamily: "'Roboto', sans-serif" }}>
@@ -277,7 +320,7 @@ const AddStudent = () => {
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
               required
-              InputProps={{
+                            InputProps={{
                 startAdornment: <MdOutlineAccountCircle style={{ marginRight: 8, color: "#004d40" }} />
               }}
             />
@@ -333,39 +376,7 @@ const AddStudent = () => {
         </CardContent>
       </GradientCard>
 
-      {showStudents && (
-        <TableContainer component={Paper}>
-          <Table aria-label="student table">
-            <TableHead>
-              <TableRow>
-                <TableHeaderCell>Student Name</TableHeaderCell>
-                <TableHeaderCell>Address</TableHeaderCell>
-                <TableHeaderCell>Semester</TableHeaderCell>
-                <TableHeaderCell>Contact No</TableHeaderCell>
-                <TableHeaderCell>Actions</TableHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredStudents.map((student) => (
-                <TableRowStyled key={student.id}>
-                  <TableCell>{student.StudentName}</TableCell>
-                  <TableCell>{student.Address}</TableCell>
-                  <TableCell>{student.Semester}</TableCell>
-                  <TableCell>{student.ContactNo}</TableCell>
-                  <TableCell align="center">
-                    <IconButton onClick={() => handleEdit(student)}>
-                      <MdEdit style={{ color: "#004d40" }} />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(student.id)}>
-                      <MdDelete style={{ color: "#d32f2f" }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRowStyled>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+      
 
       <ShowButton
         variant="contained"
@@ -374,16 +385,7 @@ const AddStudent = () => {
         {showStudents ? "Hide Students" : "Show Students"}
       </ShowButton>
 
-      {filteredStudents.length > 0 && (
-        <Button
-          variant="contained"
-          startIcon={<MdDownload />}
-          onClick={handleDownload}
-          sx={{ mt: 2, backgroundColor: "#004d40", "&:hover": { backgroundColor: "#003d33" } }}
-        >
-          Download
-        </Button>
-      )}
+      
 
       <Snackbar
         open={showToast}
